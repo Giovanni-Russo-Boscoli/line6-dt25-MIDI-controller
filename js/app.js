@@ -273,6 +273,29 @@ function setupConnection() {
     savePrefs();
     if (midi.connected) toast(`Connected to ${midi.output.name}`);
   });
+  document.querySelectorAll('[data-diag]').forEach((btn) => btn.addEventListener('click', () => {
+    const [cc, val] = btn.dataset.diag.split(':').map(Number);
+    midi.cc(cc, val);
+  }));
+  $('diagSend').addEventListener('click', () => {
+    const cc = Math.min(127, Math.max(0, Number($('diagCC').value) | 0));
+    const val = Math.min(127, Math.max(0, Number($('diagVal').value) | 0));
+    midi.cc(cc, val);
+  });
+  // If the amp reacts on some other channel, this tells you which one (channel B then back to A per channel).
+  $('diagSweep').addEventListener('click', async () => {
+    const original = midi.channel;
+    for (let ch = 1; ch <= 16; ch++) {
+      midi.channel = ch;
+      toast(`MIDI channel ${ch}: switching to B…`, 900);
+      midi.cc(19, 127);
+      await new Promise((r) => setTimeout(r, 450));
+      midi.cc(19, 0);
+      await new Promise((r) => setTimeout(r, 450));
+    }
+    midi.channel = original;
+    toast('Sweep finished. If the amp changed channel, note which MIDI channel was showing.', 5000);
+  });
   $('testSend').addEventListener('click', () => {
     midi.cc(spec.navigation.voicing.cc, voicingValue(spec, 'A', 0));
     state.active.channel = 'A';

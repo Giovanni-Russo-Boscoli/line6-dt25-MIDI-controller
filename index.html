@@ -158,6 +158,24 @@
         <input type="checkbox" id="showDt50">
         <span>Show DT50-only parameters (12AX7 boost, PI B+, feedback cap)</span>
       </label>
+      <details class="diag">
+        <summary>Troubleshoot: amp not responding?</summary>
+        <p class="muted small-note">Each button sends one message on the MIDI channel above. Watch the amp's channel LED and listen for the relay click. CC 19 works on every DT25 firmware. The other controls need firmware 2.0 or later.</p>
+        <div class="diag-row">
+          <button type="button" class="btn btn-ghost" data-diag="19:0">Channel A (CC 19 = 0)</button>
+          <button type="button" class="btn btn-ghost" data-diag="19:127">Channel B (CC 19 = 127)</button>
+        </div>
+        <div class="diag-row">
+          <button type="button" class="btn btn-ghost" data-diag="122:0">A · Voicing I (CC 122 = 0)</button>
+          <button type="button" class="btn btn-ghost" data-diag="122:2">A · Voicing III (CC 122 = 2)</button>
+        </div>
+        <div class="diag-row">
+          <label>CC <input type="number" id="diagCC" min="0" max="127" value="19" class="text-input num"></label>
+          <label>Value <input type="number" id="diagVal" min="0" max="127" value="127" class="text-input num"></label>
+          <button type="button" class="btn btn-ghost" id="diagSend">Send</button>
+          <button type="button" class="btn btn-ghost" id="diagSweep" title="Sends CC 19 = 0 on MIDI channels 1 to 16, one per half second">Try all 16 channels</button>
+        </div>
+      </details>
       <div class="sheet-actions">
         <button type="button" class="btn btn-ghost" id="testSend">Send test (Ch A · I)</button>
         <button class="btn btn-accent" value="close">Done</button>

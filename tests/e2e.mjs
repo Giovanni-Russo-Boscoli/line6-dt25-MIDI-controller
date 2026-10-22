@@ -39,6 +39,11 @@ await page.waitForFunction(() => document.querySelector('#connText').textContent
 await page.selectOption('#outputSelect', 'fake-1');
 await page.click('#testSend');
 assert.deepEqual(await sent(), [[0xb0, 122, 0]], 'test send selects Ch A voicing I');
+await page.click('.diag summary');
+await page.click('[data-diag="19:127"]');
+await page.fill('#diagCC', '122'); await page.fill('#diagVal', '4');
+await page.click('#diagSend');
+assert.deepEqual(await sent(), [[0xb0, 19, 127], [0xb0, 122, 4]], 'troubleshoot buttons');
 await page.click('#connDialog button[value=close]');
 
 // Knob: keyboard on Drive (A, CC13)
