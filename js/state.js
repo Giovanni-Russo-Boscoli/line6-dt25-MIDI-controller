@@ -94,7 +94,26 @@ export function voicingValue(spec, ch, v) {
 }
 
 function included(p, opts) {
-  return !p.model || (opts.models || []).includes(p.model);
+  return !p.unsupported && (!p.model || (opts.models || []).includes(p.model));
+}
+
+/**
+ * Firmware before 2.0 only understands the Pilot's Guide CCs: channel (19), voicing (77/114),
+ * class, tubes and reverb on/off, all stored per channel. Everything else is kept in the state
+ * (so nothing is lost when switching back) but marked unsupported and never sent.
+ */
+export function legacySpec(spec) {
+  const L = spec.legacy;
+  const mark = (p) => {
+    if (!L.params.includes(p.id)) return { ...p, unsupported: true };
+    return L.channelScope.includes(p.id) ? { ...p, scope: 'channel' } : p;
+  };
+  return {
+    ...spec,
+    globals: spec.globals.map((g) => ({ ...g, unsupported: true })),
+    channelParams: spec.channelParams.map(mark),
+    navigation: { ...spec.navigation, legacy: L },
+  };
 }
 
 /** Messages that recreate one channel+voicing slot. Assumes the slot is already selected on the amp. */
@@ -111,7 +130,7 @@ export function channelMessages(spec, state, ch, opts = {}) {
 }
 
 export function globalMessages(spec, state) {
-  return spec.globals.map((p) => ({ cc: p.cc, value: state.globals[p.id], id: p.id }));
+  return spec.globals.filter((p) => !p.unsupported).map((p) => ({ cc: p.cc, value: state.globals[p.id], id: p.id }));
 }
 
 /** Select a slot, then give the amp time to switch relays before editing it. */
@@ -119,12 +138,22 @@ export function selectSlotStep(spec, ch, v, settle = 60) {
   return { cc: spec.navigation.voicing.cc, value: voicingValue(spec, ch, v), wait: settle, id: 'voicing' };
 }
 
+/** Messages that put the amp on a channel + voicing, for either firmware. */
+export function selectSteps(spec, ch, v, settle = 60) {
+  const L = spec.navigation.legacy;
+  if (!L) return [selectSlotStep(spec, ch, v, settle)];
+  return [
+    { cc: L.channelSelect.cc, value: L.channelSelect.values[ch], wait: settle, id: 'channel' },
+    { cc: L.voicing[ch], value: v, wait: settle, id: 'voicing' },
+  ];
+}
+
 /** Current slot only: select it, then send its voicing and channel params. */
 export function currentSlotSteps(spec, state, opts = {}) {
   const ch = state.active.channel;
   const v = state.active.voicing[ch];
   return [
-    selectSlotStep(spec, ch, v, opts.settle),
+    ...selectSteps(spec, ch, v, opts.settle),
     ...slotMessages(spec, state, ch, v, opts),
     ...channelMessages(spec, state, ch, opts),
   ];
@@ -133,15 +162,21 @@ export function currentSlotSteps(spec, state, opts = {}) {
 /** Whole rig: globals, all 8 slots, both channels' knobs, then return to the active slot. */
 export function fullSyncSteps(spec, state, opts = {}) {
   const steps = [...globalMessages(spec, state)];
+  const perVoicing = spec.channelParams.some((p) => p.scope === 'voicing' && included(p, opts));
   for (const ch of CHANNELS) {
-    for (const v of VOICINGS) {
-      steps.push(selectSlotStep(spec, ch, v, opts.settle));
-      steps.push(...slotMessages(spec, state, ch, v, opts));
+    if (perVoicing) {
+      for (const v of VOICINGS) {
+        steps.push(...selectSteps(spec, ch, v, opts.settle));
+        steps.push(...slotMessages(spec, state, ch, v, opts));
+      }
+    } else {
+      steps.push(...selectSteps(spec, ch, state.active.voicing[ch], opts.settle));
     }
     steps.push(...channelMessages(spec, state, ch, opts));
   }
   const ch = state.active.channel;
-  steps.push(selectSlotStep(spec, ch, state.active.voicing[ch], 0));
+  const back = selectSteps(spec, ch, state.active.voicing[ch], 0);
+  steps.push(...back);
   return steps;
 }
 

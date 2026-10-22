@@ -48,6 +48,9 @@ between devices as JSON.
 to a `.dt25profile.json` file, and loads such a file back, replacing what's in that browser. Use it for backups or to
 move your setup between phone and computer. The selected MIDI interface is not included because it differs per device.
 
+**Older firmware:** amps on firmware before 2.0 only accept the Pilot's Guide CCs. Set *Connect MIDI → Amp firmware → Older than 2.0*
+and the app switches to channel (CC 19), voicing (CC 77 / 114), Class A/AB, Triode/Pentode and reverb on/off only.
+
 Knobs: drag up/down (Shift for fine), mouse wheel, arrow keys, double-click to reset.
 
 All parameter definitions live in `data/dt25-params.json`; the UI is generated from it.

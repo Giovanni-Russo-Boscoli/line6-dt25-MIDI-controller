@@ -502,3 +502,18 @@ body.syncing #syncAll { animation: pulse 0.8s infinite alternate; }
 .diag-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
 .diag-row label { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; }
 .text-input.num { width: 72px; flex: none; }
+
+/* ---------- older firmware mode ---------- */
+.legacy-card { display: none; }
+body.legacy .legacy-card {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+}
+.legacy-card > div { flex: 1 1 420px; }
+.legacy-title { font-size: 16px; margin-bottom: 4px; color: var(--accent); }
+body.legacy #sec-preamp, body.legacy #sec-cab, body.legacy #sec-global,
+body.legacy #reverbType, body.legacy #reverbKnobs, body.legacy #chanToggle,
+body.legacy .chain-wire, body.legacy .chain { display: none !important; }
+body.legacy .grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+body.legacy #sec-reverb .panel-title-row { margin-bottom: 0; }
+body.legacy #sec-reverb::after { content: 'Reverb type, decay and the other reverb settings need firmware 2.0. The REVERB knob on the amp sets the level.'; display: block; color: var(--muted); font-size: 13px; margin-top: 12px; }

@@ -56,6 +56,7 @@ export function parseProfile(spec, text) {
   if ([4, 8, 20].includes(s.gap)) settings.gap = s.gap;
   if (typeof s.showDt50 === 'boolean') settings.showDt50 = s.showDt50;
   if (typeof s.info === 'boolean') settings.info = s.info;
+  if (typeof s.legacy === 'boolean') settings.legacy = s.legacy;
   if (typeof s.profileName === 'string') settings.profileName = s.profileName.slice(0, 60);
 
   return { name: typeof data.name === 'string' ? data.name : 'profile', presets, current, settings };

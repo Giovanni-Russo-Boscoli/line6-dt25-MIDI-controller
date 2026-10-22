@@ -95,3 +95,19 @@ test('normalizeState repairs partial presets', () => {
   assert.equal(st.channels.B.values.drive, 64);
   assert.equal(st.channels.B.voicings[3].amp, 22);
 });
+
+test('older firmware mode only sends Pilot\'s Guide CCs', async () => {
+  const { legacySpec } = await import('../js/state.js');
+  const L = legacySpec(spec);
+  const st = createState(L);
+  st.active.channel = 'B';
+  st.active.voicing.B = 2;
+  const slot = currentSlotSteps(L, st);
+  assert.deepEqual(slot.map((s) => [s.cc, s.value]).slice(0, 2), [[19, 127], [114, 2]]);
+  assert.deepEqual(slot.slice(2).map((s) => s.cc).sort((a, b) => a - b), [105, 115, 116]);
+  const all = fullSyncSteps(L, st).map((s) => s.cc);
+  const allowed = new Set([19, 77, 114, 73, 75, 36, 115, 116, 105]);
+  assert.ok(all.every((cc) => allowed.has(cc)), `unexpected CC in ${all}`);
+  assert.ok(!all.includes(122));
+  assert.deepEqual(all.slice(-2), [19, 114], 'ends on the active channel and voicing');
+});

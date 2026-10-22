@@ -75,6 +75,14 @@
     </section>
 
 
+    <section class="panel legacy-card" id="legacyCard" aria-label="Older firmware mode">
+      <div>
+        <h2 class="legacy-title">Older firmware mode</h2>
+        <p class="muted">Your DT25 runs firmware older than 2.0, so it only accepts channel, voicing, Class A/AB, Triode/Pentode and reverb on/off over MIDI. Set the amp model, tone knobs, cab and reverb type on the amp itself. To unlock everything, update the amp to firmware 2.0 with Line 6 Monkey.</p>
+      </div>
+      <button type="button" class="btn btn-ghost" id="legacyOff">My amp has 2.0 now</button>
+    </section>
+
     <section class="panel amp" id="sec-preamp" aria-label="Preamp">
       <div class="amp-head">
         <div class="amp-id">
@@ -141,6 +149,13 @@
       <label class="row">
         <span>Output</span>
         <select id="outputSelect"><option value="">No output</option></select>
+      </label>
+      <label class="row">
+        <span>Amp firmware</span>
+        <select id="firmwareSelect">
+          <option value="v2">2.0 or later (full control)</option>
+          <option value="legacy">Older than 2.0 (basic control)</option>
+        </select>
       </label>
       <label class="row">
         <span>MIDI channel</span>

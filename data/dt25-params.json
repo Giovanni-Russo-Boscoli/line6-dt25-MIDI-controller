@@ -551,5 +551,30 @@
       "title": "MIDI Monitor",
       "text": "Every message the app sends: the raw bytes, the CC number and value, and what it does. A dot after the bytes means no MIDI output was connected, so it wasn't sent."
     }
+  },
+  "legacy": {
+    "label": "Firmware older than 2.0",
+    "source": "DT25 Pilot's Guide Rev C, MIDI Implementation table",
+    "channelSelect": {
+      "cc": 19,
+      "values": {
+        "A": 0,
+        "B": 127
+      }
+    },
+    "voicing": {
+      "A": 77,
+      "B": 114
+    },
+    "params": [
+      "opClass",
+      "tubeConfig",
+      "reverbOn"
+    ],
+    "channelScope": [
+      "opClass",
+      "tubeConfig",
+      "reverbOn"
+    ]
   }
 }

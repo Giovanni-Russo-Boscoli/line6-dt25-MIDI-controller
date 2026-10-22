@@ -1,6 +1,6 @@
 import { MidiOut, toHex } from './midi.js';
 import {
-  ccFor, currentSlotSteps, fullSyncSteps, getValue, optionsFor, setValue, voicingValue,
+  ccFor, currentSlotSteps, fullSyncSteps, getValue, legacySpec, optionsFor, selectSteps, setValue,
 } from './state.js';
 import { h, knob, picker, segmented, stomp, toggle } from './controls.js';
 import { PresetBank } from './presets.js';
@@ -13,7 +13,11 @@ const prefs = (() => {
 })();
 const savePrefs = () => { try { localStorage.setItem('dt25.prefs.v1', JSON.stringify(prefs)); } catch { /* ignore */ } };
 
-const spec = await fetch('data/dt25-params.json').then((r) => r.json());
+const fullSpec = await fetch('data/dt25-params.json').then((r) => r.json());
+// Amps on firmware older than 2.0 only accept a handful of CCs, so the whole UI runs from a reduced spec.
+const legacy = !!prefs.legacy && !!fullSpec.legacy;
+const spec = legacy ? legacySpec(fullSpec) : fullSpec;
+document.body.classList.toggle('legacy', legacy);
 const midi = new MidiOut();
 midi.channel = prefs.midiChannel || spec.midiChannel;
 const bank = new PresetBank(spec);
@@ -70,7 +74,7 @@ function onParam(p, value) {
 function selectSlot(ch, v, { send = true } = {}) {
   state.active.channel = ch;
   state.active.voicing[ch] = v;
-  if (send) midi.cc(spec.navigation.voicing.cc, voicingValue(spec, ch, v));
+  if (send) for (const step of selectSteps(spec, ch, v)) midi.cc(step.cc, step.value);
   renderAll();
   markDirty();
 }
@@ -78,7 +82,7 @@ function selectSlot(ch, v, { send = true } = {}) {
 // ---------- build UI from the spec ----------
 
 function build() {
-  const byGroup = (g) => spec.channelParams.filter((p) => p.group === g);
+  const byGroup = (g) => spec.channelParams.filter((p) => p.group === g && !p.unsupported);
   const make = (p) => {
     const cb = (v) => onParam(p, v);
     switch (p.ui) {
@@ -106,9 +110,9 @@ function build() {
   }
   // Reverb Mix is the panel REVERB knob; mirror it in the reverb section too.
   const mix = spec.channelParams.find((p) => p.id === 'reverbMix');
-  $('reverbKnobs').append(register(mix, knob({ ...mix, label: 'Mix' }, (v) => onParam(mix, v))).el);
+  if (!mix.unsupported) $('reverbKnobs').append(register(mix, knob({ ...mix, label: 'Mix' }, (v) => onParam(mix, v))).el);
 
-  for (const g of spec.globals) $('globalControls').append(make(g).el);
+  for (const g of spec.globals.filter((x) => !x.unsupported)) $('globalControls').append(make(g).el);
 
   const vl = spec.navigation.voicing.labels;
   vl.forEach((label, i) => {
@@ -131,7 +135,7 @@ function build() {
   });
 
   $('sendSlot').addEventListener('click', () => runSteps(currentSlotSteps(spec, state, { models: models() }), 'Slot sent'));
-  $('syncAll').addEventListener('click', () => runSteps(fullSyncSteps(spec, state, { models: models() }), 'All 8 slots synced'));
+  $('syncAll').addEventListener('click', () => runSteps(fullSyncSteps(spec, state, { models: models() }), legacy ? 'Both channels synced' : 'All 8 slots synced'));
 }
 
 async function runSteps(steps, done) {
@@ -191,6 +195,11 @@ function renderPresetName() {
 
 function labelForCC(cc, value) {
   const nav = spec.navigation;
+  if (nav.legacy) {
+    for (const ch of ['A', 'B']) {
+      if (nav.legacy.voicing[ch] === cc) return `Voicing ${ch} · ${nav.voicing.labels[value] ?? '?'}`;
+    }
+  }
   if (cc === nav.voicing.cc) {
     const ch = value >= nav.voicing.base.B ? 'B' : 'A';
     return `Select Ch ${ch} · ${nav.voicing.labels[value - nav.voicing.base[ch]] ?? '?'}`;
@@ -262,6 +271,15 @@ function setupConnection() {
   $('gapSelect').value = String(prefs.gap || 8);
   $('gapSelect').addEventListener('change', (e) => { prefs.gap = Number(e.target.value); savePrefs(); });
 
+  $('firmwareSelect').value = legacy ? 'legacy' : 'v2';
+  $('firmwareSelect').addEventListener('change', (e) => {
+    prefs.legacy = e.target.value === 'legacy';
+    savePrefs();
+    bank.saveWorking();
+    location.reload();
+  });
+  $('legacyOff').addEventListener('click', () => { $('firmwareSelect').value = 'v2'; $('firmwareSelect').dispatchEvent(new Event('change')); });
+
   $('showDt50').checked = !!prefs.showDt50;
   $('showDt50').addEventListener('change', (e) => { prefs.showDt50 = e.target.checked; savePrefs(); renderAll(); });
 
@@ -297,11 +315,12 @@ function setupConnection() {
     toast('Sweep finished. If the amp changed channel, note which MIDI channel was showing.', 5000);
   });
   $('testSend').addEventListener('click', () => {
-    midi.cc(spec.navigation.voicing.cc, voicingValue(spec, 'A', 0));
+    const steps = selectSteps(spec, 'A', 0);
+    for (const step of steps) midi.cc(step.cc, step.value);
     state.active.channel = 'A';
     state.active.voicing.A = 0;
     renderAll();
-    toast('Sent CC 122 = 0. The amp should switch to Channel A, Voicing I.');
+    toast(`Sent ${steps.map((x) => `CC ${x.cc} = ${x.value}`).join(', ')}. The amp should switch to Channel A, Voicing I.`);
   });
 
   if (!midi.supported) {

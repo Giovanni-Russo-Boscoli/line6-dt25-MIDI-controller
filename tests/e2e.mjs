@@ -188,6 +188,37 @@ await page.setInputFiles('#profileLoad', bad);
 await page.waitForFunction(() => document.getElementById('toast').textContent.includes('Not a DT25 Control profile'));
 await page.click('#profileDialog button[value=close]');
 
+// Older firmware mode
+await page.click('#connBtn');
+await Promise.all([page.waitForEvent('load'), page.selectOption('#firmwareSelect', 'legacy')]);
+await page.click('#connBtn');
+await page.click('#midiEnable');
+await page.click('#connDialog button[value=close]');
+await page.waitForFunction(() => document.querySelector('#connText').textContent.includes('USB MIDI'));
+await sent();
+assert.equal(await page.locator('#legacyCard').isVisible(), true);
+assert.equal(await page.locator('#sec-preamp').isVisible(), false);
+assert.equal(await page.locator('select[data-param=amp]').count(), 0, 'amp model not offered');
+await page.click('.chan[data-ch=B]');
+await page.click('.voice[data-v="2"]');
+await page.click('[data-param=opClass] .seg >> nth=0');
+await page.click('[data-param=opClass] .seg >> nth=1');
+await page.click('.stomp[data-param=reverbOn]');
+const legacyMsgs = await sent();
+assert.deepEqual(legacyMsgs.slice(0, 4), [[0xb0, 19, 127], [0xb0, 114, legacyMsgs[1][2]], [0xb0, 19, 127], [0xb0, 114, 2]]);
+assert.deepEqual(legacyMsgs.slice(4), [[0xb0, 115, 0], [0xb0, 115, 127], [0xb0, 105, legacyMsgs.at(-1)[2]]]);
+await page.click('#syncAll');
+await page.waitForFunction(() => !document.body.classList.contains('syncing'), null, { timeout: 10000 });
+const legacySync = await sent();
+assert.ok(legacySync.every((m) => [19, 77, 114, 73, 75, 36, 115, 116, 105].includes(m[1])), 'legacy sync uses old CCs only');
+if (SHOTS) {
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: `${SHOTS}/legacy.png` });
+}
+await page.click('#legacyOff');
+await page.waitForFunction(() => !document.body.classList.contains('legacy'));
+await page.waitForSelector('select[data-param=amp]');
+
 if (SHOTS) {
   await page.click('#profileBtn');
   await page.waitForTimeout(200);
