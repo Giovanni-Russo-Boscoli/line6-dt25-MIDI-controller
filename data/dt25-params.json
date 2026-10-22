@@ -1,0 +1,555 @@
+{
+  "device": "Line 6 DT25",
+  "firmware": "2.0+",
+  "source": "DT Amplifier MIDI Implementation Guide Rev A; DT25 MIDI CC Reference v2.0 Rev A",
+  "midiChannel": 1,
+  "lists": {
+    "amps": [
+      "None",
+      "Blackface Double Normal",
+      "Blackface Double Vib",
+      "Hiway 100",
+      "Super O",
+      "Gibtone 185",
+      "Tweed B-Man Normal",
+      "Tweed B-Man Bright",
+      "Blackface 'Lux Normal",
+      "Blackface 'Lux Vib",
+      "Divide 9/15",
+      "PhD Motorway",
+      "Class A-15",
+      "Class A-30",
+      "Brit J-45 Normal",
+      "Brit J-45 Bright",
+      "Brit Plexi 100 Normal",
+      "Brit Plexi 100 Bright",
+      "Brit P-75 Normal",
+      "Brit P-75 Bright",
+      "Brit J-800",
+      "Bomber Uber",
+      "Treadplate",
+      "Angel F-Ball",
+      "Line 6 Elektrik",
+      "Flip Top",
+      "Solo 100 Clean",
+      "Solo 100 Crunch",
+      "Solo 100 Overdrive",
+      "Line 6 Doom",
+      "Line 6 Epic"
+    ],
+    "cabs": [
+      "None",
+      "2x12 Blackface Double",
+      "4x12 Hiway",
+      "1x(6x9) Super O",
+      "1x12 Gibtone F-Coil",
+      "4x10 Tweed B-Man",
+      "1x12 Blackface 'Lux",
+      "1x12 Brit 12-H",
+      "2x12 PhD Ported",
+      "1x12 Blue Bell",
+      "2x12 Silver Bell",
+      "4x12 Greenback 25",
+      "4x12 Blackback 30",
+      "4x12 Brit T-75",
+      "4x12 Uber",
+      "4x12 Tread V-30",
+      "4x12 XXL V-30",
+      "1x15 Flip Top (Bass)"
+    ],
+    "reverbs": [
+      "None",
+      "Spring",
+      "'63 Spring",
+      "Plate",
+      "Room",
+      "Chamber",
+      "Hall",
+      "Cave",
+      "Ducking",
+      "Octo",
+      "Tile",
+      "Echo",
+      "Particle Verb"
+    ],
+    "mics": [
+      "None",
+      "57 Dynamic",
+      "57 Dynamic, Off Axis",
+      "409 Dynamic",
+      "421 Dynamic",
+      "4038 Ribbon",
+      "121 Ribbon",
+      "67 Condenser",
+      "87 Condenser"
+    ],
+    "topologies": [
+      "Tight",
+      "Loose",
+      "Zero",
+      "Resonant"
+    ]
+  },
+  "navigation": {
+    "channelSelect": {
+      "cc": 19,
+      "values": {
+        "A": 0,
+        "B": 127
+      }
+    },
+    "channelToggle": {
+      "cc": 66,
+      "value": 127
+    },
+    "voicing": {
+      "cc": 122,
+      "base": {
+        "A": 0,
+        "B": 4
+      },
+      "labels": [
+        "I",
+        "II",
+        "III",
+        "IV"
+      ]
+    }
+  },
+  "globals": [
+    {
+      "id": "lowVolume",
+      "label": "Low Volume Mode",
+      "group": "global",
+      "ui": "toggle",
+      "cc": 85,
+      "off": 0,
+      "on": 127,
+      "offLabel": "Normal",
+      "onLabel": "Low Vol",
+      "default": 0
+    },
+    {
+      "id": "mic",
+      "label": "XLR Direct Out Mic",
+      "group": "global",
+      "ui": "picker",
+      "cc": 82,
+      "list": "mics",
+      "default": 1
+    }
+  ],
+  "channelParams": [
+    {
+      "id": "amp",
+      "label": "HD Amp",
+      "group": "preamp",
+      "scope": "voicing",
+      "ui": "picker",
+      "cc": {
+        "A": 11,
+        "B": 91
+      },
+      "ccWithDefaults": {
+        "A": 12,
+        "B": 89
+      },
+      "list": "amps"
+    },
+    {
+      "id": "drive",
+      "label": "Drive",
+      "group": "preamp",
+      "scope": "channel",
+      "ui": "knob",
+      "cc": {
+        "A": 13,
+        "B": 92
+      },
+      "min": 0,
+      "max": 127,
+      "default": 64
+    },
+    {
+      "id": "bass",
+      "label": "Bass",
+      "group": "preamp",
+      "scope": "channel",
+      "ui": "knob",
+      "cc": {
+        "A": 14,
+        "B": 93
+      },
+      "min": 0,
+      "max": 127,
+      "default": 64
+    },
+    {
+      "id": "mid",
+      "label": "Mid",
+      "group": "preamp",
+      "scope": "channel",
+      "ui": "knob",
+      "cc": {
+        "A": 15,
+        "B": 94
+      },
+      "min": 0,
+      "max": 127,
+      "default": 64
+    },
+    {
+      "id": "treble",
+      "label": "Treble",
+      "group": "preamp",
+      "scope": "channel",
+      "ui": "knob",
+      "cc": {
+        "A": 16,
+        "B": 95
+      },
+      "min": 0,
+      "max": 127,
+      "default": 64
+    },
+    {
+      "id": "presence",
+      "label": "Presence",
+      "group": "preamp",
+      "scope": "channel",
+      "ui": "knob",
+      "cc": {
+        "A": 21,
+        "B": 102
+      },
+      "min": 0,
+      "max": 127,
+      "default": 64
+    },
+    {
+      "id": "reverbMix",
+      "label": "Reverb",
+      "group": "preamp",
+      "scope": "channel",
+      "ui": "knob",
+      "cc": {
+        "A": 55,
+        "B": 59
+      },
+      "min": 0,
+      "max": 127,
+      "default": 32
+    },
+    {
+      "id": "volume",
+      "label": "Volume",
+      "group": "preamp",
+      "scope": "channel",
+      "ui": "knob",
+      "cc": {
+        "A": 17,
+        "B": 103
+      },
+      "min": 0,
+      "max": 127,
+      "default": 80
+    },
+    {
+      "id": "opClass",
+      "label": "Operating Class",
+      "group": "power",
+      "scope": "voicing",
+      "ui": "toggle",
+      "cc": {
+        "A": 73,
+        "B": 115
+      },
+      "off": 0,
+      "on": 127,
+      "offLabel": "Class A",
+      "onLabel": "Class AB"
+    },
+    {
+      "id": "tubeConfig",
+      "label": "Power Tubes",
+      "group": "power",
+      "scope": "voicing",
+      "ui": "toggle",
+      "cc": {
+        "A": 75,
+        "B": 116
+      },
+      "off": 0,
+      "on": 127,
+      "offLabel": "Triode",
+      "onLabel": "Pentode"
+    },
+    {
+      "id": "topology",
+      "label": "Topology / NFL",
+      "group": "power",
+      "scope": "voicing",
+      "ui": "segmented",
+      "cc": {
+        "A": 77,
+        "B": 114
+      },
+      "list": "topologies"
+    },
+    {
+      "id": "boost",
+      "label": "12AX7 Boost",
+      "group": "power",
+      "scope": "voicing",
+      "ui": "toggle",
+      "model": "DT50",
+      "cc": {
+        "A": 74,
+        "B": 117
+      },
+      "off": 0,
+      "on": 127,
+      "offLabel": "Normal",
+      "onLabel": "Boost",
+      "default": 0
+    },
+    {
+      "id": "piVoltage",
+      "label": "Phase Inverter B+",
+      "group": "power",
+      "scope": "voicing",
+      "ui": "toggle",
+      "model": "DT50",
+      "cc": {
+        "A": 78,
+        "B": 86
+      },
+      "off": 0,
+      "on": 127,
+      "offLabel": "Low",
+      "onLabel": "High",
+      "default": 127
+    },
+    {
+      "id": "fbCap",
+      "label": "Feedback Cap",
+      "group": "power",
+      "scope": "voicing",
+      "ui": "toggle",
+      "model": "DT50",
+      "cc": {
+        "A": 79,
+        "B": 87
+      },
+      "off": 0,
+      "on": 127,
+      "offLabel": "X Tight",
+      "onLabel": "Y Smooth",
+      "default": 0
+    },
+    {
+      "id": "cab",
+      "label": "Cab",
+      "group": "cab",
+      "scope": "voicing",
+      "ui": "picker",
+      "cc": {
+        "A": 71,
+        "B": 110
+      },
+      "list": "cabs"
+    },
+    {
+      "id": "reverbOn",
+      "label": "Reverb",
+      "group": "reverb",
+      "scope": "channel",
+      "ui": "stomp",
+      "cc": {
+        "A": 36,
+        "B": 105
+      },
+      "off": 0,
+      "on": 127,
+      "default": 127
+    },
+    {
+      "id": "reverbType",
+      "label": "Type",
+      "group": "reverb",
+      "scope": "voicing",
+      "ui": "picker",
+      "cc": {
+        "A": 37,
+        "B": 107
+      },
+      "list": "reverbs"
+    },
+    {
+      "id": "reverbDecay",
+      "label": "Decay",
+      "group": "reverb",
+      "scope": "voicing",
+      "ui": "knob",
+      "cc": {
+        "A": 52,
+        "B": 56
+      },
+      "min": 0,
+      "max": 127,
+      "default": 64
+    },
+    {
+      "id": "reverbPreDelay",
+      "label": "Pre Delay",
+      "group": "reverb",
+      "scope": "voicing",
+      "ui": "knob",
+      "cc": {
+        "A": 53,
+        "B": 57
+      },
+      "min": 0,
+      "max": 127,
+      "default": 20
+    },
+    {
+      "id": "reverbTone",
+      "label": "Tone",
+      "group": "reverb",
+      "scope": "voicing",
+      "ui": "knob",
+      "cc": {
+        "A": 54,
+        "B": 58
+      },
+      "min": 0,
+      "max": 127,
+      "default": 64
+    }
+  ],
+  "voicingDefaults": [
+    {
+      "amp": 1,
+      "cab": 1,
+      "topology": 0,
+      "opClass": 127,
+      "tubeConfig": 127,
+      "reverbType": 1
+    },
+    {
+      "amp": 14,
+      "cab": 11,
+      "topology": 1,
+      "opClass": 127,
+      "tubeConfig": 127,
+      "reverbType": 2
+    },
+    {
+      "amp": 13,
+      "cab": 10,
+      "topology": 2,
+      "opClass": 0,
+      "tubeConfig": 127,
+      "reverbType": 3
+    },
+    {
+      "amp": 22,
+      "cab": 15,
+      "topology": 3,
+      "opClass": 127,
+      "tubeConfig": 127,
+      "reverbType": 4
+    }
+  ],
+  "help": {
+    "channel": {
+      "title": "Channel A / B",
+      "text": "The DT25's two channels. Each has its own tone knobs and its own four voicings, so A can be clean and B dirty. The app selects the channel and voicing together with CC 122."
+    },
+    "voicing": {
+      "title": "Voicing I-IV",
+      "text": "Each channel has four voicing slots. Every slot remembers its own amp model, cab, power amp setup and reverb settings. Picking one here does the same as the Voicing toggle on the amp."
+    },
+    "sendSlot": {
+      "title": "Send slot",
+      "text": "Resends every setting of the current channel and voicing. Use it after touching a switch on the amp itself, so the amp matches the screen again."
+    },
+    "syncAll": {
+      "title": "Sync all",
+      "text": "Sends the global settings and all 8 channel/voicing slots (about 100 messages). The amp can't report its settings back, so do this once after connecting."
+    },
+    "presets": {
+      "title": "Presets",
+      "text": "The DT25 has no preset memory over MIDI, so presets are saved in this browser. Loading one sends every setting to the amp. Use Export / Import to move them to another device."
+    },
+    "amp": {
+      "title": "HD Amp",
+      "text": "The amp model the preamp emulates in this voicing. The DT25 also reconfigures its real tube power section to suit, so models change feel as well as tone."
+    },
+    "ampDefaults": {
+      "title": "Load amp defaults",
+      "text": "When ticked, choosing an amp also loads Line 6's matching cab, operating class and tube settings (CC 12 / 89). The amp can't report those back, so the screen may not show them."
+    },
+    "opClass": {
+      "title": "Operating Class",
+      "text": "Class A runs the power amp at 10 W, cathode biased: softer, more touch sensitive and breaks up sooner. Class AB runs 25 W, fixed biased: more headroom, louder and tighter."
+    },
+    "tubeConfig": {
+      "title": "Power Tubes",
+      "text": "Pentode is full power: clear, punchy and commanding. Triode rewires the power tubes for a quieter, rounder, more vintage sound and feel."
+    },
+    "topology": {
+      "title": "Topology / NFL",
+      "text": "The power amp's negative feedback loop. Tight: lots of feedback, firm and clean, Blackface style. Loose: less feedback, looser British feel. Zero: no feedback, open, chimey and dynamic. Resonant: feedback plus a low-end resonance that suits high gain."
+    },
+    "boost": {
+      "title": "12AX7 Boost",
+      "text": "DT50 only, the DT25 ignores it. Adds a preamp tube volume boost, and only works with Low Volume Mode off."
+    },
+    "piVoltage": {
+      "title": "Phase Inverter B+",
+      "text": "DT50 only, the DT25 ignores it. Sets the phase inverter supply voltage, low or high. It subtly changes how the power amp breaks up."
+    },
+    "fbCap": {
+      "title": "Feedback Cap",
+      "text": "DT50 only, the DT25 ignores it. Picks the capacitor in the feedback loop: X sounds tighter, Y smoother."
+    },
+    "cab": {
+      "title": "Cab",
+      "text": "Speaker cabinet simulation for this voicing. It is heard mainly on the cab-simulated XLR Direct Out, your real speaker stays your real speaker."
+    },
+    "reverbType": {
+      "title": "Reverb Type",
+      "text": "The reverb algorithm for this voicing, from classic springs to ambient Particle Verb. The REVERB knob on the faceplate sets how much you hear."
+    },
+    "reverbDecay": {
+      "title": "Decay",
+      "text": "How long the reverb tail rings out."
+    },
+    "reverbPreDelay": {
+      "title": "Pre Delay",
+      "text": "A short gap before the reverb starts. More pre delay keeps your picking clear before the ambience comes in."
+    },
+    "reverbTone": {
+      "title": "Reverb Tone",
+      "text": "Brightness of the reverb tail: lower is darker and warmer, higher is brighter."
+    },
+    "lowVolume": {
+      "title": "Low Volume Mode",
+      "text": "Turns the power section down to bedroom level and uses modeling to keep the cranked-amp feel. Same as the rear panel Low Volume switch."
+    },
+    "mic": {
+      "title": "XLR Direct Out Mic",
+      "text": "The microphone simulated on the XLR Direct Out, for recording or a PA without miking your cab. It does not change the speaker sound."
+    },
+    "chanToggle": {
+      "title": "Toggle channel",
+      "text": "Flips to the other channel like a footswitch press (CC 66). Mostly handy for testing the connection."
+    },
+    "monitor": {
+      "title": "MIDI Monitor",
+      "text": "Every message the app sends: the raw bytes, the CC number and value, and what it does. A dot after the bytes means no MIDI output was connected, so it wasn't sent."
+    }
+  }
+}

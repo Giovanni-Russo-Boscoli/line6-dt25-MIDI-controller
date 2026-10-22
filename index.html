@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0e0f12">
+  <title>DT25 Control</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23ff8a1f'/%3E%3Cpath d='M16 16 L16 5' stroke='%23111' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+</head>
+<body data-channel="A">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">DT25 <b>Control</b></span>
+    </div>
+
+    <div class="preset-bar" aria-label="Presets">
+      <button type="button" class="icon-btn" id="presetPrev" aria-label="Previous preset">‹</button>
+      <button type="button" class="preset-name" id="presetName" aria-haspopup="dialog">
+        <span class="preset-label">Preset</span>
+        <span class="preset-title" id="presetTitle">Untitled</span>
+      </button>
+      <button type="button" class="icon-btn" id="presetNext" aria-label="Next preset">›</button>
+      <button type="button" class="btn btn-ghost" id="presetSave" data-help-after="presets">Save</button>
+    </div>
+
+    <button type="button" class="info-btn" id="infoBtn" aria-pressed="false" title="Show explanations for each feature">
+      <span class="info-ico" aria-hidden="true">?</span><span class="info-text">Info</span>
+    </button>
+
+    <button type="button" class="info-btn" id="profileBtn" aria-haspopup="dialog" title="Save or load your profile">
+      <span class="info-ico profile-ico" aria-hidden="true"></span><span class="info-text">Profile</span>
+    </button>
+
+    <button type="button" class="conn" id="connBtn" aria-haspopup="dialog">
+      <span class="conn-dot" id="connDot"></span>
+      <span class="conn-text" id="connText">Connect MIDI</span>
+    </button>
+  </header>
+
+  <div class="banner" id="banner" hidden></div>
+
+  <main class="rig">
+    <section class="slotbar" aria-label="Channel and voicing">
+      <div class="slot-group">
+      <span class="slot-label" data-label="channel">Channel</span>
+      <div class="chan-switch" role="radiogroup" aria-label="Channel">
+        <button type="button" class="chan" data-ch="A" role="radio">A</button>
+        <button type="button" class="chan" data-ch="B" role="radio">B</button>
+      </div>
+      </div>
+      <div class="slot-group grow">
+      <span class="slot-label" data-label="voicing">Voicing</span>
+      <div class="voicing" role="radiogroup" aria-label="Voicing" id="voicing"></div>
+      </div>
+      <div class="slot-actions">
+        <button type="button" class="btn btn-ghost" id="sendSlot" data-help-after="sendSlot" title="Resend everything for this channel and voicing">Send slot</button>
+        <button type="button" class="btn btn-accent" id="syncAll" data-help-after="syncAll" title="Send all 8 channel/voicing slots and globals">Sync all</button>
+      </div>
+    </section>
+
+    <nav class="chain" aria-label="Signal chain">
+      <a href="#sec-preamp" class="chain-node"><span class="chain-ico ico-pre"></span><span>Preamp</span></a>
+      <span class="chain-wire"></span>
+      <a href="#sec-power" class="chain-node"><span class="chain-ico ico-power"></span><span>Power</span></a>
+      <span class="chain-wire"></span>
+      <a href="#sec-cab" class="chain-node"><span class="chain-ico ico-cab"></span><span>Cab</span></a>
+      <span class="chain-wire"></span>
+      <a href="#sec-reverb" class="chain-node" id="chainReverb"><span class="chain-ico ico-verb"></span><span>Reverb</span></a>
+      <span class="chain-wire"></span>
+      <a href="#sec-global" class="chain-node"><span class="chain-ico ico-out"></span><span>Out</span></a>
+    </nav>
+
+    <section class="panel amp" id="sec-preamp" aria-label="Preamp">
+      <div class="amp-head">
+        <div class="amp-id">
+          <span class="amp-chan" id="ampChan">A · I</span>
+          <div id="ampPicker"></div>
+        </div>
+        <label class="check" title="Uses CC 12 / 89: the amp also loads its own default cab, class and tube settings">
+          <input type="checkbox" id="ampDefaults">
+          <span data-label="ampDefaults">Load amp defaults</span>
+        </label>
+      </div>
+      <div class="faceplate">
+        <div class="knob-row" id="preampKnobs"></div>
+      </div>
+    </section>
+
+    <div class="grid">
+      <section class="panel" id="sec-power" aria-label="Power amp">
+        <h2 class="panel-title">Power Amp</h2>
+        <div class="stack" id="powerControls"></div>
+        <div class="stack dt50" id="dt50Controls" hidden></div>
+      </section>
+
+      <section class="panel" id="sec-cab" aria-label="Cabinet">
+        <h2 class="panel-title">Cabinet</h2>
+        <div class="cab-visual" id="cabVisual" aria-hidden="true"></div>
+        <div id="cabControls"></div>
+      </section>
+
+      <section class="panel" id="sec-reverb" aria-label="Reverb">
+        <div class="panel-title-row">
+          <h2 class="panel-title">Reverb</h2>
+          <div id="reverbStomp"></div>
+        </div>
+        <div id="reverbType"></div>
+        <div class="knob-row compact" id="reverbKnobs"></div>
+      </section>
+
+      <section class="panel" id="sec-global" aria-label="Global and output">
+        <h2 class="panel-title">Global &amp; Output</h2>
+        <div class="stack" id="globalControls"></div>
+        <button type="button" class="btn btn-ghost wide" id="chanToggle" data-help-after="chanToggle">Toggle channel A/B (CC 66)</button>
+      </section>
+    </div>
+
+    <section class="panel monitor" aria-label="MIDI monitor">
+      <div class="panel-title-row">
+        <h2 class="panel-title" data-label="monitor">MIDI Monitor</h2>
+        <button type="button" class="btn btn-ghost small" id="clearLog">Clear</button>
+      </div>
+      <ol class="log" id="log" aria-live="off"></ol>
+    </section>
+  </main>
+
+  <dialog id="connDialog" class="sheet">
+    <form method="dialog" class="sheet-body">
+      <h2>MIDI connection</h2>
+      <p class="muted" id="connHelp">Plug in your USB-to-MIDI cable, connect its <b>MIDI OUT</b> plug to the DT25 <b>MIDI IN</b>, then choose the interface below. The DT25 listens on MIDI channel 1.</p>
+      <button type="button" class="btn btn-accent wide" id="midiEnable">Enable Web MIDI</button>
+      <label class="row">
+        <span>Output</span>
+        <select id="outputSelect"><option value="">No output</option></select>
+      </label>
+      <label class="row">
+        <span>MIDI channel</span>
+        <select id="channelSelect"></select>
+      </label>
+      <label class="row">
+        <span>Message spacing</span>
+        <select id="gapSelect">
+          <option value="4">Fast (4 ms)</option>
+          <option value="8" selected>Normal (8 ms)</option>
+          <option value="20">Safe (20 ms)</option>
+        </select>
+      </label>
+      <label class="check">
+        <input type="checkbox" id="showDt50">
+        <span>Show DT50-only parameters (12AX7 boost, PI B+, feedback cap)</span>
+      </label>
+      <div class="sheet-actions">
+        <button type="button" class="btn btn-ghost" id="testSend">Send test (Ch A · I)</button>
+        <button class="btn btn-accent" value="close">Done</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="presetDialog" class="sheet">
+    <form method="dialog" class="sheet-body">
+      <h2>Presets</h2>
+      <p class="muted">The DT25 has no program changes, so presets live in this browser. Loading one sends every setting to the amp.</p>
+      <ul class="preset-list" id="presetList"></ul>
+      <div class="sheet-actions wrap">
+        <button type="button" class="btn btn-ghost" id="presetNew">Save as new</button>
+        <button type="button" class="btn btn-ghost" id="presetRename">Rename</button>
+        <button type="button" class="btn btn-ghost danger" id="presetDelete">Delete</button>
+        <button type="button" class="btn btn-ghost" id="presetExport">Export</button>
+        <label class="btn btn-ghost file-btn">Import<input type="file" id="presetImport" accept="application/json,.json" hidden></label>
+        <button class="btn btn-accent" value="close">Done</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="profileDialog" class="sheet">
+    <form method="dialog" class="sheet-body">
+      <h2>Profile</h2>
+      <p class="muted">Your profile is everything this app keeps in this browser: all presets, your current unsaved tweaks and your settings (MIDI channel, message spacing, DT50 options, Info mode). Save it as a file to back it up, or load it on another phone or computer.</p>
+      <label class="row">
+        <span>Profile name</span>
+        <input type="text" id="profileName" maxlength="60" value="My DT25 profile" class="text-input">
+      </label>
+      <button type="button" class="btn btn-accent wide" id="profileSave">Save profile file</button>
+      <label class="btn btn-ghost wide file-btn center">Load profile file<input type="file" id="profileLoad" accept="application/json,.json" hidden></label>
+      <p class="muted small-note">Loading a profile replaces the presets and settings in this browser. Save your current profile first if you want to keep it. The chosen MIDI interface stays as it is, since it differs per device.</p>
+      <div class="sheet-actions">
+        <button class="btn btn-accent" value="close">Done</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="help-pop" id="helpPop" role="tooltip" hidden>
+    <strong class="help-title" id="helpTitle"></strong>
+    <p class="help-text" id="helpText"></p>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
