@@ -377,3 +377,122 @@ body.syncing #syncAll { animation: pulse 0.8s infinite alternate; }
 .file-btn.center { display: block; text-align: center; }
 .small-note { font-size: 12.5px; }
 @media (max-width: 720px) { #profileBtn { margin-left: auto; } #infoBtn { margin-left: 0; } }
+
+/* =====================================================================
+   Compact layout: fit the whole rig on one screen and use the full width.
+   ===================================================================== */
+.rig { max-width: 1840px; gap: 12px; padding: 12px 16px; }
+.slotbar { gap: 12px 14px; }
+.slotbar .chain { flex: 1; min-width: 0; align-self: flex-end; height: 52px; }
+.chain-node { padding: 7px 11px; }
+
+/* monitor drawer */
+.monitor { padding: 0; }
+.monitor-bar {
+  display: flex; align-items: center; gap: 14px; padding: 11px 16px; cursor: pointer; list-style: none;
+}
+.monitor-bar::-webkit-details-marker { display: none; }
+.monitor-bar .panel-title { margin: 0; flex: none; }
+.monitor-last { flex: 1; min-width: 0; font: 500 12px var(--mono); color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.monitor-toggle { width: 10px; height: 10px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(-135deg) translate(-2px, -2px); transition: transform 0.2s; flex: none; }
+.monitor[open] .monitor-toggle { transform: rotate(45deg); }
+.monitor-body { padding: 0 16px 12px; display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+.monitor-body .log { width: 100%; max-height: 160px; }
+
+/* tighter fields everywhere */
+.panel { padding: 14px; }
+.panel-title { margin-bottom: 10px; }
+.panel-title-row { margin-bottom: 10px; }
+.stack { gap: 10px; }
+.field-label { margin-bottom: 5px; }
+.seg { padding: 8px 6px; }
+.picker-face { padding: 8px 12px; }
+.cab-visual { aspect-ratio: auto; height: clamp(84px, 13vh, 150px); padding: 10px 16%; margin-bottom: 10px; }
+.cab-visual .spk { height: 100%; width: auto; max-width: none; }
+.cab-visual.n2 { grid-template-columns: auto auto; justify-content: center; gap: 10%; }
+.cab-visual.n4 { grid-template-columns: auto auto; grid-template-rows: 1fr 1fr; justify-content: center; padding: 8px; gap: 6px 10px; }
+.cab-visual.n4 .spk { max-width: none; }
+.cab-visual.oval .spk { aspect-ratio: 1.5; }
+.cab-visual.s15 .spk { max-width: none; }
+.knob-row.compact { margin-top: 10px; }
+
+@media (min-width: 1100px) {
+  /* Preamp: amp selector on the left, knobs on the right, in one band */
+  .amp { display: grid; grid-template-columns: minmax(300px, 0.9fr) 2.6fr; }
+  .amp-head { flex-direction: column; align-items: stretch; justify-content: center; gap: 12px; border-bottom: 0; border-right: 1px solid var(--line); padding: 16px 18px; }
+  .amp-id { min-width: 0; flex: none; }
+  .faceplate { padding: 14px 18px 12px; display: flex; align-items: center; }
+  .faceplate::before { left: 0; right: auto; top: 18px; bottom: 18px; width: 2px; height: auto; background: linear-gradient(180deg, transparent, var(--accent), transparent); }
+  .faceplate .knob-row { width: 100%; }
+  .knob { width: clamp(58px, 8.4vh, 88px); }
+
+  .grid { grid-template-columns: 1fr 1fr 1.15fr 1fr; gap: 12px; }
+  #reverbKnobs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  #reverbKnobs .knob { width: clamp(46px, 6.4vh, 70px); }
+  #reverbKnobs .knob-label { font-size: 10px; letter-spacing: 0.08em; }
+  #sec-global { display: flex; flex-direction: column; }
+  #chanToggle { margin-top: auto; }
+}
+
+/* Short desktop screens (laptops): shave a little more height */
+@media (min-width: 1100px) and (max-height: 800px) {
+  .topbar { padding-top: 7px; padding-bottom: 7px; }
+  .rig { gap: 10px; padding-top: 10px; }
+  .chan, .voice { height: 40px; }
+  .slot-label { display: none; }
+  .info-on .slot-label { display: inline-flex; }
+  .slotbar .chain { height: 44px; }
+  .panel { padding: 12px; }
+  .seg { padding: 7px 6px; }
+  .knob-value { font-size: 12px; }
+}
+
+/* Mid-size (tablets / small laptops): two columns */
+@media (min-width: 721px) and (max-width: 1099px) {
+  .slotbar .chain { order: 5; flex-basis: 100%; height: auto; }
+  .grid { grid-template-columns: 1fr 1fr; }
+  #reverbKnobs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+/* Phones: still one column, but denser */
+@media (max-width: 720px) {
+  .rig { padding: 10px; gap: 10px; }
+  .slotbar .chain { order: 5; flex-basis: 100%; height: auto; }
+  .faceplate { padding: 14px 10px 10px; }
+  .knob { width: min(76px, 100%); }
+  #reverbKnobs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  #reverbKnobs .knob-label { font-size: 10px; letter-spacing: 0.06em; }
+  .amp-head { padding: 12px 14px; gap: 8px; }
+  .chan, .voice { height: 40px; }
+}
+.panel.amp { padding: 0; }
+.amp-head, .faceplate { min-width: 0; }
+@media (min-width: 1100px) {
+  .knob { width: clamp(58px, 9.5vh, 112px); }
+  #reverbKnobs .knob { width: clamp(46px, 7vh, 84px); }
+  .cab-visual { height: clamp(84px, 16vh, 210px); }
+}
+@media (min-width: 1100px) and (max-height: 800px) {
+  .monitor-bar { padding-top: 8px; padding-bottom: 8px; }
+  .cab-visual { height: clamp(78px, 12vh, 120px); }
+}
+.picker-name { min-width: 0; }
+@media (min-width: 1100px) {
+  .knob { width: clamp(58px, 11vh, 124px); }
+  #reverbKnobs .knob { width: clamp(46px, 8vh, 92px); }
+  .cab-visual { height: clamp(84px, 19vh, 230px); }
+}
+@media (min-width: 1100px) and (max-height: 800px) {
+  .knob { width: clamp(56px, 9.2vh, 80px); }
+  #reverbKnobs .knob { width: clamp(44px, 6.6vh, 64px); }
+}
+.amp-id, #ampPicker, #ampPicker .picker, #ampPicker .picker-row { min-width: 0; max-width: 100%; }
+@media (min-width: 1100px) { .amp { grid-template-columns: minmax(320px, 1.1fr) 2.6fr; } }
+@media (min-width: 1100px) and (max-width: 1500px) { .picker-hero .picker-name { font-size: 18px; } .picker-hero .picker-arrow { width: 38px; } }
+@media (max-width: 1099px) { .amp-id { min-width: min(100%, 260px); flex: 1 1 260px; } }
+@media (min-width: 1100px) {
+  #sec-global { display: block; }
+  #chanToggle { margin-top: 14px; }
+}
+.info-on #reverbKnobs .knob-label { white-space: nowrap; gap: 3px; }
+.info-on #reverbKnobs .help-q { width: 13px; height: 13px; font-size: 9px; }

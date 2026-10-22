@@ -57,23 +57,23 @@
       <span class="slot-label" data-label="voicing">Voicing</span>
       <div class="voicing" role="radiogroup" aria-label="Voicing" id="voicing"></div>
       </div>
+      <nav class="chain" aria-label="Signal chain">
+        <a href="#sec-preamp" class="chain-node"><span class="chain-ico ico-pre"></span><span>Preamp</span></a>
+        <span class="chain-wire"></span>
+        <a href="#sec-power" class="chain-node"><span class="chain-ico ico-power"></span><span>Power</span></a>
+        <span class="chain-wire"></span>
+        <a href="#sec-cab" class="chain-node"><span class="chain-ico ico-cab"></span><span>Cab</span></a>
+        <span class="chain-wire"></span>
+        <a href="#sec-reverb" class="chain-node" id="chainReverb"><span class="chain-ico ico-verb"></span><span>Reverb</span></a>
+        <span class="chain-wire"></span>
+        <a href="#sec-global" class="chain-node"><span class="chain-ico ico-out"></span><span>Out</span></a>
+      </nav>
       <div class="slot-actions">
         <button type="button" class="btn btn-ghost" id="sendSlot" data-help-after="sendSlot" title="Resend everything for this channel and voicing">Send slot</button>
         <button type="button" class="btn btn-accent" id="syncAll" data-help-after="syncAll" title="Send all 8 channel/voicing slots and globals">Sync all</button>
       </div>
     </section>
 
-    <nav class="chain" aria-label="Signal chain">
-      <a href="#sec-preamp" class="chain-node"><span class="chain-ico ico-pre"></span><span>Preamp</span></a>
-      <span class="chain-wire"></span>
-      <a href="#sec-power" class="chain-node"><span class="chain-ico ico-power"></span><span>Power</span></a>
-      <span class="chain-wire"></span>
-      <a href="#sec-cab" class="chain-node"><span class="chain-ico ico-cab"></span><span>Cab</span></a>
-      <span class="chain-wire"></span>
-      <a href="#sec-reverb" class="chain-node" id="chainReverb"><span class="chain-ico ico-verb"></span><span>Reverb</span></a>
-      <span class="chain-wire"></span>
-      <a href="#sec-global" class="chain-node"><span class="chain-ico ico-out"></span><span>Out</span></a>
-    </nav>
 
     <section class="panel amp" id="sec-preamp" aria-label="Preamp">
       <div class="amp-head">
@@ -120,13 +120,17 @@
       </section>
     </div>
 
-    <section class="panel monitor" aria-label="MIDI monitor">
-      <div class="panel-title-row">
-        <h2 class="panel-title" data-label="monitor">MIDI Monitor</h2>
+    <details class="panel monitor" id="monitor">
+      <summary class="monitor-bar">
+        <span class="panel-title" data-label="monitor">MIDI Monitor</span>
+        <span class="monitor-last" id="monitorLast">No messages yet</span>
+        <span class="monitor-toggle" aria-hidden="true"></span>
+      </summary>
+      <div class="monitor-body">
+        <ol class="log" id="log" aria-live="off"></ol>
         <button type="button" class="btn btn-ghost small" id="clearLog">Clear</button>
       </div>
-      <ol class="log" id="log" aria-live="off"></ol>
-    </section>
+    </details>
   </main>
 
   <dialog id="connDialog" class="sheet">

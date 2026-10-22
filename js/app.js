@@ -216,6 +216,7 @@ midi.addEventListener('sent', (e) => {
     h('span', { class: 'what', text: labelForCC(cc, value) }));
   const log = $('log');
   log.prepend(li);
+  $('monitorLast').textContent = `${toHex(bytes)}  ·  ${labelForCC(cc, value) || `CC ${cc} = ${value}`}`;
   while (log.children.length > MAX_LOG) log.lastChild.remove();
   const dot = $('connDot');
   dot.classList.remove('blink');
@@ -420,7 +421,9 @@ function setupProfile() {
 
 // ---------- boot ----------
 
-$('clearLog').addEventListener('click', () => $('log').replaceChildren());
+$('clearLog').addEventListener('click', () => { $('log').replaceChildren(); $('monitorLast').textContent = 'No messages yet'; });
+$('monitor').open = !!prefs.monitorOpen;
+$('monitor').addEventListener('toggle', () => { prefs.monitorOpen = $('monitor').open; savePrefs(); });
 document.querySelectorAll('.chain-node').forEach((a) => a.addEventListener('click', (e) => {
   e.preventDefault();
   document.querySelector(a.getAttribute('href')).scrollIntoView({ behavior: 'smooth', block: 'start' });
