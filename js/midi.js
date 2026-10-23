@@ -33,9 +33,15 @@ export class MidiOut extends EventTarget {
   async init() {
     if (!this.supported) throw new Error('Web MIDI is not supported in this browser.');
     this.access = await navigator.requestMIDIAccess({ sysex: false });
+    // Some cheap USB-MIDI cables fire bursts of connect/disconnect events on Android when plugged in.
+    // Coalesce them so the page only refreshes its port list once things settle.
+    let settle = 0;
     this.access.addEventListener('statechange', () => {
-      if (this.output && this.output.state === 'disconnected') this.output = null;
-      this.emit('ports');
+      clearTimeout(settle);
+      settle = setTimeout(() => {
+        if (this.output && this.output.state === 'disconnected') this.output = null;
+        this.emit('ports');
+      }, 250);
     });
     this.emit('ports');
     return this.outputs();
