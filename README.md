@@ -29,12 +29,12 @@ The DT25 listens on MIDI channel 1. **Send test** selects Channel A, Voicing I (
 
 | Area | Controls | Stored on the amp per |
 | --- | --- | --- |
-| Channel / Voicing | A/B sends CC 19, I–IV sends CC 77 (A) / 114 (B). Voicing = NFL topology (Tight, Loose, Zero, Resonant). CC 122 is documented but did not respond on a real DT25 | — |
+| Channel / Voicing | A/B sends CC 19, I–IV sends CC 77 (A) / 114 (B). Each voicing button shows the amp model stored in that slot. CC 122 is documented but did not respond on a real DT25 | — |
 | Preamp | HD Amp (CC 11/91, or 12/89 with "Load amp defaults"), Drive, Bass, Mid, Treble, Presence, Reverb, Volume | Amp: voicing. Knobs: channel |
 | Power amp | Class A/AB, Triode/Pentode | voicing |
 | Cab | 17 cabs + None | voicing |
 | Reverb | On/Off, 12 types, Decay, Pre Delay, Tone, Mix | Type/Decay/Pre/Tone: voicing. On + Mix: channel |
-| Global | Low Volume Mode, XLR mic emulation, channel toggle (CC 66) | amp |
+| Global | Low Volume Mode, XLR mic emulation, channel toggle (CC 66). Set once for the rig: presets and profile imports never change them | amp |
 | DT50 only | 12AX7 boost, PI B+ voltage, feedback cap (hidden unless enabled in the connection sheet) | voicing |
 
 The amp has no MIDI output and no Program Change, so the app keeps its own copy of all 8 channel/voicing

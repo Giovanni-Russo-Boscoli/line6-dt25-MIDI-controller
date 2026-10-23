@@ -119,6 +119,20 @@ assert.deepEqual(sync.filter((m) => m[1] === 77 || m[1] === 114).map((m) => `${m
 assert.ok(!sync.some((m) => m[1] === 122), 'CC122 never sent');
 assert.ok(sync.every((m) => m[0] === 0xb0 && m[2] <= 127));
 console.log(`sync sent ${sync.length} messages`);
+assert.ok(sync.some((m) => m[1] === 85 && m[2] === 127), 'sync sends the global Low Volume value');
+// Globals belong to the rig: switching presets keeps them.
+await page.click('#presetNext');
+await page.waitForFunction(() => !document.body.classList.contains('syncing'), null, { timeout: 10000 });
+const afterPreset = await sent();
+assert.ok(afterPreset.some((m) => m[1] === 85 && m[2] === 127), 'preset change keeps Low Volume on');
+assert.ok(afterPreset.some((m) => m[1] === 82 && m[2] === 6), 'preset change keeps the XLR mic');
+assert.equal(await page.locator('[data-param=lowVolume] .seg >> nth=1').getAttribute('aria-checked'), 'true');
+await page.click('#presetPrev');
+await page.waitForFunction(() => !document.body.classList.contains('syncing'), null, { timeout: 10000 });
+await sent();
+// Voicing buttons show the amp stored in each slot.
+const vName = await page.locator('.voice[data-v="0"] .voice-name').textContent();
+assert.equal(vName, await page.locator('#ampPicker .picker-name').textContent());
 
 // MIDI channel setting changes the status byte
 await page.click('#connBtn');

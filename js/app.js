@@ -1,6 +1,6 @@
 import { MidiOut, toHex } from './midi.js';
 import {
-  ccFor, currentSlotSteps, fullSyncSteps, getValue, legacySpec, optionsFor, selectSteps, setValue,
+  ccFor, isGlobal, currentSlotSteps, fullSyncSteps, getValue, legacySpec, optionsFor, selectSteps, setValue,
 } from './state.js';
 import { h, knob, picker, segmented, stomp, toggle } from './controls.js';
 import { PresetBank } from './presets.js';
@@ -22,6 +22,19 @@ const midi = new MidiOut();
 midi.channel = prefs.midiChannel || spec.midiChannel;
 const bank = new PresetBank(spec);
 let state = bank.working;
+
+// Global & Output settings (Low Volume Mode, XLR mic) belong to the rig, not to a preset:
+// they live in prefs and are copied over whatever state a preset brings, so switching
+// presets can never cause a volume jump.
+if (!prefs.globals) {
+  prefs.globals = { ...state.globals };
+  savePrefs();
+}
+function withGlobals(st) {
+  for (const g of spec.globals) if (Number.isFinite(prefs.globals[g.id])) st.globals[g.id] = prefs.globals[g.id];
+  return st;
+}
+withGlobals(state);
 const widgets = new Map(); // param id -> [widget]
 let syncing = false;
 
@@ -68,6 +81,12 @@ function onParam(p, value) {
   for (const w of widgets.get(p.id) || []) w.set(value);
   if (p.id === 'cab') renderCab();
   if (p.id === 'reverbOn') renderReverbState();
+  if (p.id === 'amp') renderVoicingNames();
+  if (isGlobal(spec, p)) {
+    prefs.globals[p.id] = value;
+    savePrefs();
+    return;
+  }
   markDirty();
 }
 
@@ -117,9 +136,9 @@ function build() {
   const vl = spec.navigation.voicing.labels;
   vl.forEach((label, i) => {
     $('voicing').append(h('button', {
-      type: 'button', class: 'voice', role: 'radio', 'data-v': i, title: spec.navigation.voicing.names[i],
+      type: 'button', class: 'voice', role: 'radio', 'data-v': i,
       onclick: () => selectSlot(state.active.channel, i),
-    }, h('span', { class: 'voice-num', text: label }), h('span', { class: 'voice-name', text: spec.navigation.voicing.names[i] })));
+    }, h('span', { class: 'voice-num', text: label }), h('span', { class: 'voice-name' })));
   });
   document.querySelectorAll('.chan').forEach((b) => b.addEventListener('click', () => {
     const ch = b.dataset.ch;
@@ -160,10 +179,22 @@ function renderAll() {
   }
   document.querySelectorAll('.chan').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.ch === ch)));
   document.querySelectorAll('.voice').forEach((b) => b.setAttribute('aria-checked', String(Number(b.dataset.v) === v)));
-  $('ampChan').textContent = `CH ${ch} · ${spec.navigation.voicing.labels[v]} ${spec.navigation.voicing.names[v].toUpperCase()}`;
+  $('ampChan').textContent = `CH ${ch} · VOICING ${spec.navigation.voicing.labels[v]}`;
+  renderVoicingNames();
   $('dt50Controls').hidden = !prefs.showDt50;
   renderCab();
   renderReverbState();
+}
+
+/** Each voicing button shows the amp model stored in that slot. */
+function renderVoicingNames() {
+  const ch = state.active.channel;
+  const amps = spec.lists.amps;
+  document.querySelectorAll('.voice').forEach((b) => {
+    const name = amps[state.channels[ch].voicings[Number(b.dataset.v)].amp] || '';
+    b.querySelector('.voice-name').textContent = name;
+    b.title = `Voicing ${b.querySelector('.voice-num').textContent}: ${name}`;
+  });
 }
 
 function renderCab() {
@@ -198,7 +229,7 @@ function labelForCC(cc, value) {
   for (const ch of ['A', 'B']) {
     if (nav.voicing.cc[ch] === cc) {
       const v = nav.voicing.labels[value];
-      return v ? `Voicing ${ch} · ${v} (${nav.voicing.names[value]})` : `Voicing ${ch} · ?`;
+      return `Voicing ${ch} · ${v ?? '?'}`;
     }
   }
   if (cc === nav.channelSelect.cc) return `Channel ${value >= 64 ? 'B' : 'A'}`;
@@ -337,7 +368,7 @@ function setupConnection() {
 // ---------- presets ----------
 
 function loadPreset(i) {
-  state = bank.select(i);
+  state = withGlobals(bank.select(i));
   renderAll();
   renderPresetName();
   if (midi.connected) runSteps(fullSyncSteps(spec, state, { models: models() }), `Loaded “${bank.current.name}”`);

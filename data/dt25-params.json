@@ -113,12 +113,6 @@
         "III",
         "IV"
       ],
-      "names": [
-        "Tight",
-        "Loose",
-        "Zero",
-        "Resonant"
-      ],
       "note": "CC 122 (direct channel+voicing select) is documented but did not respond on a real DT25; CC 19 + CC 77/114 do."
     }
   },
@@ -459,7 +453,7 @@
     },
     "voicing": {
       "title": "Voicing I-IV",
-      "text": "Each channel has four voicings (I-IV), each with its own power amp feedback: I Tight (firm, Blackface style), II Loose (British feel), III Zero feedback (open, chimey, dynamic) and IV Resonant (extra low end for high gain). Every voicing also remembers its own amp model, cab, power amp and reverb settings. Sent as CC 77 (A) or CC 114 (B), the same as the amp's Voicing switch."
+      "text": "Each channel has four voicing slots (I-IV). Every slot remembers its own amp model, cab, power amp and reverb settings; the name under each button is the amp model stored in that slot. Sent as CC 77 (channel A) or CC 114 (channel B), the same as the amp's Voicing switch."
     },
     "sendSlot": {
       "title": "Send slot",
@@ -523,11 +517,11 @@
     },
     "lowVolume": {
       "title": "Low Volume Mode",
-      "text": "Turns the power section down to bedroom level and uses modeling to keep the cranked-amp feel. Same as the rear panel Low Volume switch."
+      "text": "Turns the power section down to bedroom level and uses modeling to keep the cranked-amp feel. Same as the rear panel Low Volume switch. This is a global setting: it stays the same when you change presets, so loading a preset never causes a volume jump."
     },
     "mic": {
       "title": "XLR Direct Out Mic",
-      "text": "The microphone simulated on the XLR Direct Out, for recording or a PA without miking your cab. It does not change the speaker sound."
+      "text": "The microphone simulated on the XLR Direct Out, for recording or a PA without miking your cab. It does not change the speaker sound. Global: it stays the same across all presets."
     },
     "chanToggle": {
       "title": "Toggle channel",
@@ -536,6 +530,10 @@
     "monitor": {
       "title": "MIDI Monitor",
       "text": "Every message the app sends: the raw bytes, the CC number and value, and what it does. A dot after the bytes means no MIDI output was connected, so it wasn't sent."
+    },
+    "globalPanel": {
+      "title": "Global & Output",
+      "text": "These settings belong to your rig, not to a preset. Set them once: changing or loading presets never touches them, and Sync all sends the values shown here."
     }
   },
   "legacy": {
