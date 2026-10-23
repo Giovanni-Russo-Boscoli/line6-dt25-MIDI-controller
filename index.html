@@ -144,8 +144,11 @@
   <dialog id="connDialog" class="sheet">
     <form method="dialog" class="sheet-body">
       <h2>MIDI connection</h2>
-      <p class="muted" id="connHelp">Plug in your USB-to-MIDI cable, connect its <b>MIDI OUT</b> plug to the DT25 <b>MIDI IN</b>, then choose the interface below. The DT25 listens on MIDI channel 1.</p>
-      <button type="button" class="btn btn-accent wide" id="midiEnable">Enable Web MIDI</button>
+      <p class="muted" id="connHelp">Plug in your USB-to-MIDI cable, connect its <b>MIDI OUT</b> plug to the DT25 <b>MIDI IN</b>, then choose the interface below. Or tap <b>Connect Bluetooth</b> for a Bluetooth MIDI adapter on the amp. The DT25 listens on MIDI channel 1.</p>
+      <div class="conn-actions">
+        <button type="button" class="btn btn-accent" id="midiEnable">Enable Web MIDI</button>
+        <button type="button" class="btn btn-ghost" id="bleConnect" hidden>Connect Bluetooth</button>
+      </div>
       <label class="row">
         <span>Output</span>
         <select id="outputSelect"><option value="">No output</option></select>

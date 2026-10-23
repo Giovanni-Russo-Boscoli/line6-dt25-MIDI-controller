@@ -94,6 +94,8 @@ h2 { margin: 0; }
 .btn-accent { background: var(--accent); border-color: transparent; color: #0b0c0f; box-shadow: 0 4px 18px var(--accent-glow); }
 .btn.small { padding: 5px 10px; font-size: 13px; }
 .btn.wide { width: 100%; }
+.conn-actions { display: flex; gap: 8px; }
+.conn-actions .btn { flex: 1 1 0; min-width: 0; padding-inline: 10px; white-space: normal; }
 .btn.danger { color: var(--danger); }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 

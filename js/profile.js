@@ -6,7 +6,7 @@ export const PROFILE_FORMAT = 'dt25-control-profile';
 const KEYS = { presets: 'dt25.presets.v1', current: 'dt25.current.v1', prefs: 'dt25.prefs.v1' };
 // The MIDI port id is specific to one computer, so it is not carried over.
 // Global & Output values stay with the rig too, so importing a profile can't cause a volume jump.
-const LOCAL_ONLY_PREFS = ['outputId', 'globals'];
+const LOCAL_ONLY_PREFS = ['outputId', 'globals', 'bleId'];
 
 function read(key) {
   try { return JSON.parse(localStorage.getItem(key)); } catch { return null; }

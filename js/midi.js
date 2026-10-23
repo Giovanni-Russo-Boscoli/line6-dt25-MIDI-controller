@@ -16,6 +16,7 @@ export class MidiOut extends EventTarget {
     super();
     this.access = null;
     this.output = null;
+    this.ble = null; // Bluetooth MIDI output, listed next to the Web MIDI ports
     this.channel = 1;
     this.pending = new Map(); // cc -> value, coalesced per animation frame
     this.frame = 0;
@@ -48,7 +49,24 @@ export class MidiOut extends EventTarget {
   }
 
   outputs() {
-    return this.access ? [...this.access.outputs.values()] : [];
+    const list = this.access ? [...this.access.outputs.values()] : [];
+    if (this.ble && this.ble.state === 'connected') list.push(this.ble);
+    return list;
+  }
+
+  /** Use a Bluetooth MIDI output (see ble.js) and select it. */
+  attachBle(out) {
+    if (this.ble && this.ble !== out) this.ble.disconnect();
+    this.ble = out;
+    out.addEventListener('statechange', () => {
+      if (this.output === out) this.output = null;
+      this.emit('ports');
+      this.emit('bledisconnect', { name: out.name });
+    });
+    out.addEventListener('error', (e) => this.emit('error', { message: e.detail.message }));
+    this.output = out;
+    this.emit('ports');
+    return out;
   }
 
   async select(id) {

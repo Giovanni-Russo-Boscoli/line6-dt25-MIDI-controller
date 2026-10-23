@@ -112,3 +112,11 @@ test('older firmware mode only sends Pilot\'s Guide CCs', async () => {
   assert.ok(!all.includes(122));
   assert.deepEqual(all.slice(-2), [19, 114], 'ends on the active channel and voicing');
 });
+
+test('BLE MIDI packet framing', async () => {
+  const { blePacket } = await import('../js/ble.js');
+  // ts = 0x1234 & 0x1fff = 0x1234 -> header 0x80 | 0x24, low 0x80 | 0x34
+  assert.deepEqual([...blePacket([[0xb0, 13, 74]], 0x1234)], [0xa4, 0xb4, 0xb0, 13, 74]);
+  assert.deepEqual([...blePacket([[0xb0, 19, 0], [0xb0, 77, 2]], 5)],
+    [0x80, 0x85, 0xb0, 19, 0, 0x85, 0xb0, 77, 2]);
+});

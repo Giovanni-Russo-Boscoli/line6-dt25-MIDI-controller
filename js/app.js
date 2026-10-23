@@ -1,4 +1,5 @@
 import { MidiOut, toHex } from './midi.js';
+import { bleSupported, requestBleMidi, reconnectBleMidi } from './ble.js';
 import {
   ccFor, isGlobal, currentSlotSteps, fullSyncSteps, getValue, legacySpec, optionsFor, selectSteps, setValue,
 } from './state.js';
@@ -262,6 +263,7 @@ midi.addEventListener('sent', (e) => {
 });
 midi.addEventListener('error', (e) => toast(`MIDI error: ${e.detail.message}`));
 midi.addEventListener('ports', renderPorts);
+midi.addEventListener('bledisconnect', (e) => toast(`${e.detail.name} disconnected. Tap Connect Bluetooth to reconnect.`, 4000));
 
 function renderPorts() {
   const sel = $('outputSelect');
@@ -272,12 +274,13 @@ function renderPorts() {
   const ok = midi.connected;
   $('connDot').classList.toggle('on', ok);
   $('connText').textContent = ok ? midi.output.name : (midi.access ? 'Choose output' : 'Connect MIDI');
-  $('midiEnable').hidden = !!midi.access;
+  $('midiEnable').hidden = !!midi.access || (!midi.supported && bleSupported());
 }
 
 async function enableMidi() {
   try {
     await midi.init();
+    if (midi.connected) { renderPorts(); return true; } // already on Bluetooth
     if (prefs.outputId && midi.outputs().some((o) => o.id === prefs.outputId)) await midi.select(prefs.outputId);
     else if (midi.outputs().length === 1) await midi.select(midi.outputs()[0].id);
     renderPorts();
@@ -288,6 +291,29 @@ async function enableMidi() {
       : err.message, 5000);
     return false;
   }
+}
+
+async function connectBle() {
+  try {
+    const out = midi.attachBle(await requestBleMidi());
+    prefs.bleId = out.device.id;
+    prefs.outputId = out.id;
+    savePrefs();
+    toast(`Connected to ${out.name} over Bluetooth`);
+  } catch (err) {
+    if (err.name === 'NotFoundError') return; // picker closed without choosing
+    toast(`Bluetooth: ${err.message}`, 5000);
+  }
+}
+
+// Silent reconnect to the last Bluetooth device, where the browser allows it without the picker.
+async function reconnectBle() {
+  if (!prefs.bleId) return;
+  try {
+    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000));
+    const out = await Promise.race([reconnectBleMidi(prefs.bleId), timeout]);
+    if (out && !midi.connected) midi.attachBle(out);
+  } catch { /* the user can tap Connect Bluetooth */ }
 }
 
 function setupConnection() {
@@ -313,6 +339,9 @@ function setupConnection() {
 
   $('connBtn').addEventListener('click', () => $('connDialog').showModal());
   $('midiEnable').addEventListener('click', enableMidi);
+  $('bleConnect').hidden = !bleSupported();
+  $('bleConnect').addEventListener('click', connectBle);
+  if (bleSupported()) reconnectBle();
   $('outputSelect').addEventListener('change', async (e) => {
     await midi.select(e.target.value);
     prefs.outputId = e.target.value;
@@ -354,6 +383,12 @@ function setupConnection() {
   if (!midi.supported) {
     const b = $('banner');
     b.hidden = false;
+    if (bleSupported()) {
+      b.hidden = true;
+      $('midiEnable').hidden = true;
+      $('connHelp').textContent = 'This browser has no Web MIDI, but it can connect to a Bluetooth MIDI adapter on the DT25 MIDI IN.';
+      return;
+    }
     b.textContent = 'This browser has no Web MIDI. Use Chrome, Edge or Opera on a computer or Android (iPhone and iPad browsers do not support it). You can still explore the panel, messages show in the monitor.';
     $('midiEnable').disabled = true;
     $('connHelp').textContent = 'Web MIDI is not available in this browser.';

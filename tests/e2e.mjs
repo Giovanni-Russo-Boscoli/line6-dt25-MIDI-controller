@@ -255,6 +255,43 @@ if (SHOTS) {
   await phone.screenshot({ path: `${SHOTS}/phone-info.png` });
 }
 
+// Bluetooth MIDI: fake Web Bluetooth device, check the BLE packets carry the CC bytes.
+{
+  const ble = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  ble.on('pageerror', (e) => errors.push(e.message));
+  await ble.addInitScript(() => {
+    delete Navigator.prototype.requestMIDIAccess;
+    window.__ble = [];
+    const characteristic = {
+      startNotifications: async () => {},
+      writeValueWithoutResponse: async (v) => { window.__ble.push(Array.from(v)); },
+    };
+    const device = new EventTarget();
+    Object.assign(device, {
+      id: 'dev-1', name: 'MIDI A',
+      gatt: { connect: async () => ({ getPrimaryService: async () => ({ getCharacteristic: async () => characteristic }) }), disconnect() {} },
+    });
+    window.__device = device;
+    navigator.bluetooth = { requestDevice: async () => device };
+  });
+  await ble.goto(URL);
+  await ble.click('#connBtn');
+  assert.ok(await ble.isHidden('#midiEnable'), 'no Web MIDI button without Web MIDI');
+  await ble.click('#bleConnect');
+  await ble.waitForFunction(() => document.querySelector('#connText').textContent === 'MIDI A');
+  await ble.click('#testSend');
+  await ble.waitForFunction(() => window.__ble.length > 0);
+  const msgs = (await ble.evaluate(() => window.__ble)).flatMap((p) => {
+    const out = [];
+    for (let i = 1; i < p.length; i += 4) out.push(p.slice(i + 1, i + 4));
+    return out;
+  });
+  assert.deepEqual(msgs, [[0xb0, 19, 0], [0xb0, 77, 0]], 'BLE test send');
+  await ble.evaluate(() => window.__device.dispatchEvent(new Event('gattserverdisconnected')));
+  await ble.waitForFunction(() => document.querySelector('#connText').textContent !== 'MIDI A');
+  await ble.close();
+}
+
 await browser.close();
 assert.deepEqual(errors, [], 'no page errors');
 console.log('e2e OK');
