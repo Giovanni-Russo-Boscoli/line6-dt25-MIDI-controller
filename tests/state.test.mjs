@@ -11,7 +11,7 @@ const spec = JSON.parse(readFileSync(new URL('../data/dt25-params.json', import.
 // Expected CCs straight from the MIDI Implementation Guide Rev A tables.
 const EXPECTED = {
   amp: [11, 91], drive: [13, 92], bass: [14, 93], mid: [15, 94], treble: [16, 95], volume: [17, 103],
-  presence: [21, 102], topology: [77, 114], opClass: [73, 115], tubeConfig: [75, 116], boost: [74, 117],
+  presence: [21, 102], opClass: [73, 115], tubeConfig: [75, 116], boost: [74, 117],
   piVoltage: [78, 86], fbCap: [79, 87], reverbOn: [36, 105], reverbType: [37, 107], reverbDecay: [52, 56],
   reverbPreDelay: [53, 57], reverbTone: [54, 58], reverbMix: [55, 59], cab: [71, 110],
 };
@@ -34,7 +34,7 @@ test('globals and navigation CCs', () => {
   assert.equal(findParam(spec, 'mic').cc, 82);
   assert.equal(spec.navigation.channelSelect.cc, 19);
   assert.equal(spec.navigation.channelToggle.cc, 66);
-  assert.equal(spec.navigation.voicing.cc, 122);
+  assert.deepEqual(spec.navigation.voicing.cc, { A: 77, B: 114 });
 });
 
 test('list sizes match the documented value ranges', () => {
@@ -64,16 +64,16 @@ test('voicing-scoped values are stored per channel and voicing', () => {
   assert.equal(getValue(spec, st, drive, 'A', 3), 99, 'channel knobs ignore voicing');
 });
 
-test('current slot sends CC122 first with the right value', () => {
+test('current slot selects channel (CC19) then voicing (CC77/114)', () => {
   const st = createState(spec);
   st.active.channel = 'B';
   st.active.voicing.B = 3;
   const steps = currentSlotSteps(spec, st);
-  assert.deepEqual([steps[0].cc, steps[0].value], [122, 7]);
+  assert.deepEqual(steps.slice(0, 2).map((s) => [s.cc, s.value]), [[19, 127], [114, 3]]);
   assert.ok(steps.every((s) => s.value >= 0 && s.value <= 127));
-  assert.ok(!steps.some((s) => [117, 86, 87].includes(s.cc)), 'DT50-only CCs excluded by default');
-  const ccs = steps.slice(1).map((s) => s.cc).sort((a, b) => a - b);
-  assert.deepEqual(ccs, [56, 57, 58, 59, 91, 92, 93, 94, 95, 102, 103, 105, 107, 110, 114, 115, 116]);
+  assert.ok(!steps.some((s) => [117, 86, 87, 122].includes(s.cc)), 'no DT50-only or CC122 by default');
+  const ccs = steps.slice(2).map((s) => s.cc).sort((a, b) => a - b);
+  assert.deepEqual(ccs, [56, 57, 58, 59, 91, 92, 93, 94, 95, 102, 103, 105, 107, 110, 115, 116]);
 });
 
 test('full sync covers all 8 slots and returns to the active slot', () => {
@@ -81,8 +81,9 @@ test('full sync covers all 8 slots and returns to the active slot', () => {
   st.active.channel = 'A';
   st.active.voicing.A = 1;
   const steps = fullSyncSteps(spec, st);
-  const selects = steps.filter((s) => s.cc === 122).map((s) => s.value);
-  assert.deepEqual(selects, [0, 1, 2, 3, 4, 5, 6, 7, 1]);
+  const selects = steps.filter((s) => s.id === 'channel' || s.id === 'voicing').map((s) => `${s.cc}=${s.value}`);
+  assert.deepEqual(selects, ['19=0', '77=0', '19=0', '77=1', '19=0', '77=2', '19=0', '77=3',
+    '19=127', '114=0', '19=127', '114=1', '19=127', '114=2', '19=127', '114=3', '19=0', '77=1']);
   assert.deepEqual(steps.slice(0, 2).map((s) => s.cc), [85, 82]);
   const withDt50 = fullSyncSteps(spec, st, { models: ['DT50'] });
   assert.ok(withDt50.some((s) => s.cc === 74) && withDt50.some((s) => s.cc === 117));

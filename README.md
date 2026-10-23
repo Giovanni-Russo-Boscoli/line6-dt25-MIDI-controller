@@ -29,9 +29,9 @@ The DT25 listens on MIDI channel 1. **Send test** selects Channel A, Voicing I (
 
 | Area | Controls | Stored on the amp per |
 | --- | --- | --- |
-| Channel / Voicing | A/B and I–IV buttons send CC 122 (0–7) | — |
+| Channel / Voicing | A/B sends CC 19, I–IV sends CC 77 (A) / 114 (B). Voicing = NFL topology (Tight, Loose, Zero, Resonant). CC 122 is documented but did not respond on a real DT25 | — |
 | Preamp | HD Amp (CC 11/91, or 12/89 with "Load amp defaults"), Drive, Bass, Mid, Treble, Presence, Reverb, Volume | Amp: voicing. Knobs: channel |
-| Power amp | Class A/AB, Triode/Pentode, Topology/NFL (Tight, Loose, Zero, Resonant) | voicing |
+| Power amp | Class A/AB, Triode/Pentode | voicing |
 | Cab | 17 cabs + None | voicing |
 | Reverb | On/Off, 12 types, Decay, Pre Delay, Tone, Mix | Type/Decay/Pre/Tone: voicing. On + Mix: channel |
 | Global | Low Volume Mode, XLR mic emulation, channel toggle (CC 66) | amp |

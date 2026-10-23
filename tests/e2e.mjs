@@ -38,12 +38,12 @@ await page.click('#midiEnable');
 await page.waitForFunction(() => document.querySelector('#connText').textContent.includes('USB MIDI'));
 await page.selectOption('#outputSelect', 'fake-1');
 await page.click('#testSend');
-assert.deepEqual(await sent(), [[0xb0, 122, 0]], 'test send selects Ch A voicing I');
+assert.deepEqual(await sent(), [[0xb0, 19, 0], [0xb0, 77, 0]], 'test send selects Ch A voicing I');
 await page.click('.diag summary');
 await page.click('[data-diag="19:127"]');
-await page.fill('#diagCC', '122'); await page.fill('#diagVal', '4');
+await page.fill('#diagCC', '114'); await page.fill('#diagVal', '3');
 await page.click('#diagSend');
-assert.deepEqual(await sent(), [[0xb0, 19, 127], [0xb0, 122, 4]], 'troubleshoot buttons');
+assert.deepEqual(await sent(), [[0xb0, 19, 127], [0xb0, 114, 3]], 'troubleshoot buttons');
 await page.click('#connDialog button[value=close]');
 
 // Knob: keyboard on Drive (A, CC13)
@@ -77,8 +77,8 @@ await page.uncheck('#ampDefaults');
 // Power amp toggles on channel A
 await page.click('[data-param=opClass] .seg >> text=Class A');
 await page.click('[data-param=tubeConfig] .seg >> text=Triode');
-await page.click('[data-param=topology] .seg >> text=Resonant');
-assert.deepEqual(await sent(), [[0xb0, 73, 0], [0xb0, 75, 0], [0xb0, 77, 3]]);
+assert.deepEqual(await sent(), [[0xb0, 73, 0], [0xb0, 75, 0]]);
+assert.equal(await page.locator('[data-param=topology]').count(), 0, 'topology is the voicing switch now');
 
 // Cab, reverb, globals
 await page.selectOption('select[data-param=cab]', '16');
@@ -91,18 +91,17 @@ assert.deepEqual(await sent(), [[0xb0, 71, 16], [0xb0, 36, 0], [0xb0, 37, 12], [
 // Switch to channel B voicing III -> CC122 = 6, then edits use channel B CCs
 await page.click('.chan[data-ch=B]');
 await page.click('.voice[data-v="2"]');
-assert.deepEqual(await sent(), [[0xb0, 122, 4], [0xb0, 122, 6]]);
+assert.deepEqual(await sent(), [[0xb0, 19, 127], [0xb0, 114, 0], [0xb0, 19, 127], [0xb0, 114, 2]]);
 const driveB = page.locator('.knob[data-param=drive]').first();
 await driveB.focus();
 await page.keyboard.press('Home');
 await page.waitForFunction((cc) => window.__sent.some((m) => m[1] === cc), 92);
-await page.click('[data-param=topology] .seg >> text=Loose');
 await page.selectOption('select[data-param=cab]', '3');
 const reverbMixB = page.locator('#reverbKnobs .knob[data-param=reverbMix]');
 await reverbMixB.focus();
 await page.keyboard.press('End');
 await page.waitForFunction((cc) => window.__sent.some((m) => m[1] === cc), 59);
-assert.deepEqual(await sent(), [[0xb0, 92, 0], [0xb0, 114, 1], [0xb0, 110, 3], [0xb0, 59, 127]]);
+assert.deepEqual(await sent(), [[0xb0, 92, 0], [0xb0, 110, 3], [0xb0, 59, 127]]);
 // Twin Reverb knob on the faceplate follows
 assert.equal(await page.locator('#preampKnobs .knob[data-param=reverbMix]').getAttribute('aria-valuenow'), '127');
 
@@ -116,7 +115,8 @@ await sent();
 await page.click('#syncAll');
 await page.waitForFunction(() => !document.body.classList.contains('syncing'), null, { timeout: 10000 });
 const sync = await sent();
-assert.deepEqual(sync.filter((m) => m[1] === 122).map((m) => m[2]), [0, 1, 2, 3, 4, 5, 6, 7, 0]);
+assert.deepEqual(sync.filter((m) => m[1] === 77 || m[1] === 114).map((m) => `${m[1]}=${m[2]}`), ['77=0', '77=1', '77=2', '77=3', '114=0', '114=1', '114=2', '114=3', '77=0']);
+assert.ok(!sync.some((m) => m[1] === 122), 'CC122 never sent');
 assert.ok(sync.every((m) => m[0] === 0xb0 && m[2] <= 127));
 console.log(`sync sent ${sync.length} messages`);
 
@@ -125,7 +125,7 @@ await page.click('#connBtn');
 await page.selectOption('#channelSelect', '3');
 await page.click('#connDialog button[value=close]');
 await page.click('.voice[data-v="1"]');
-assert.deepEqual(await sent(), [[0xb2, 122, 1]]);
+assert.deepEqual(await sent(), [[0xb2, 19, 0], [0xb2, 77, 1]]);
 await page.click('#connBtn');
 await page.selectOption('#channelSelect', '1');
 await page.click('#connDialog button[value=close]');
@@ -136,12 +136,12 @@ assert.equal(await page.locator('.voice[data-v="1"]').getAttribute('aria-checked
 
 // Info mode
 assert.equal(await page.locator('#helpPop').isHidden(), true);
-await page.click('[data-label=topology]');
+await page.click('[data-label=opClass]');
 assert.equal(await page.locator('#helpPop').isHidden(), true, 'labels inert while Info is off');
 await page.click('#infoBtn');
 assert.equal(await page.locator('.help-link').count() >= 15, true);
-await page.click('[data-label=topology]');
-assert.match(await page.locator('#helpText').textContent(), /negative feedback/);
+await page.click('[data-label=opClass]');
+assert.match(await page.locator('#helpText').textContent(), /10 W/);
 const before = await page.isChecked('#ampDefaults');
 await page.click('[data-label=ampDefaults]');
 assert.equal(await page.isChecked('#ampDefaults'), before, 'help link does not toggle the checkbox');
@@ -224,7 +224,7 @@ if (SHOTS) {
   await page.waitForTimeout(200);
   await page.screenshot({ path: `${SHOTS}/profile.png` });
   await page.click('#profileDialog button[value=close]');
-  await page.click('[data-label=topology]');
+  await page.click('[data-label=opClass]');
   await page.waitForTimeout(300);
   await page.screenshot({ path: `${SHOTS}/info.png` });
   await page.keyboard.press('Escape');

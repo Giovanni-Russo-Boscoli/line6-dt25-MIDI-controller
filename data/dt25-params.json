@@ -103,17 +103,23 @@
       "value": 127
     },
     "voicing": {
-      "cc": 122,
-      "base": {
-        "A": 0,
-        "B": 4
+      "cc": {
+        "A": 77,
+        "B": 114
       },
       "labels": [
         "I",
         "II",
         "III",
         "IV"
-      ]
+      ],
+      "names": [
+        "Tight",
+        "Loose",
+        "Zero",
+        "Resonant"
+      ],
+      "note": "CC 122 (direct channel+voicing select) is documented but did not respond on a real DT25; CC 19 + CC 77/114 do."
     }
   },
   "globals": [
@@ -285,18 +291,6 @@
       "onLabel": "Pentode"
     },
     {
-      "id": "topology",
-      "label": "Topology / NFL",
-      "group": "power",
-      "scope": "voicing",
-      "ui": "segmented",
-      "cc": {
-        "A": 77,
-        "B": 114
-      },
-      "list": "topologies"
-    },
-    {
       "id": "boost",
       "label": "12AX7 Boost",
       "group": "power",
@@ -432,7 +426,6 @@
     {
       "amp": 1,
       "cab": 1,
-      "topology": 0,
       "opClass": 127,
       "tubeConfig": 127,
       "reverbType": 1
@@ -440,7 +433,6 @@
     {
       "amp": 14,
       "cab": 11,
-      "topology": 1,
       "opClass": 127,
       "tubeConfig": 127,
       "reverbType": 2
@@ -448,7 +440,6 @@
     {
       "amp": 13,
       "cab": 10,
-      "topology": 2,
       "opClass": 0,
       "tubeConfig": 127,
       "reverbType": 3
@@ -456,7 +447,6 @@
     {
       "amp": 22,
       "cab": 15,
-      "topology": 3,
       "opClass": 127,
       "tubeConfig": 127,
       "reverbType": 4
@@ -465,11 +455,11 @@
   "help": {
     "channel": {
       "title": "Channel A / B",
-      "text": "The DT25's two channels. Each has its own tone knobs and its own four voicings, so A can be clean and B dirty. The app selects the channel and voicing together with CC 122."
+      "text": "The DT25's two channels. Each has its own tone knobs and its own four voicings, so A can be clean and B dirty. Sent as CC 19."
     },
     "voicing": {
       "title": "Voicing I-IV",
-      "text": "Each channel has four voicing slots. Every slot remembers its own amp model, cab, power amp setup and reverb settings. Picking one here does the same as the Voicing toggle on the amp."
+      "text": "Each channel has four voicings (I-IV), each with its own power amp feedback: I Tight (firm, Blackface style), II Loose (British feel), III Zero feedback (open, chimey, dynamic) and IV Resonant (extra low end for high gain). Every voicing also remembers its own amp model, cab, power amp and reverb settings. Sent as CC 77 (A) or CC 114 (B), the same as the amp's Voicing switch."
     },
     "sendSlot": {
       "title": "Send slot",
@@ -498,10 +488,6 @@
     "tubeConfig": {
       "title": "Power Tubes",
       "text": "Pentode is full power: clear, punchy and commanding. Triode rewires the power tubes for a quieter, rounder, more vintage sound and feel."
-    },
-    "topology": {
-      "title": "Topology / NFL",
-      "text": "The power amp's negative feedback loop. Tight: lots of feedback, firm and clean, Blackface style. Loose: less feedback, looser British feel. Zero: no feedback, open, chimey and dynamic. Resonant: feedback plus a low-end resonance that suits high gain."
     },
     "boost": {
       "title": "12AX7 Boost",

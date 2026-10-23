@@ -89,9 +89,6 @@ export function ccFor(p, ch, { withDefaults = false } = {}) {
   return p.cc[ch];
 }
 
-export function voicingValue(spec, ch, v) {
-  return spec.navigation.voicing.base[ch] + v;
-}
 
 function included(p, opts) {
   return !p.unsupported && (!p.model || (opts.models || []).includes(p.model));
@@ -133,18 +130,16 @@ export function globalMessages(spec, state) {
   return spec.globals.filter((p) => !p.unsupported).map((p) => ({ cc: p.cc, value: state.globals[p.id], id: p.id }));
 }
 
-/** Select a slot, then give the amp time to switch relays before editing it. */
-export function selectSlotStep(spec, ch, v, settle = 60) {
-  return { cc: spec.navigation.voicing.cc, value: voicingValue(spec, ch, v), wait: settle, id: 'voicing' };
-}
-
-/** Messages that put the amp on a channel + voicing, for either firmware. */
+/**
+ * Messages that put the amp on a channel + voicing: CC 19 picks the channel, then CC 77 / 114
+ * picks that channel's voicing (the same as the amp's Voicing switch). The documented CC 122
+ * did not respond on a real DT25, while these work on every firmware.
+ */
 export function selectSteps(spec, ch, v, settle = 60) {
-  const L = spec.navigation.legacy;
-  if (!L) return [selectSlotStep(spec, ch, v, settle)];
+  const nav = spec.navigation;
   return [
-    { cc: L.channelSelect.cc, value: L.channelSelect.values[ch], wait: settle, id: 'channel' },
-    { cc: L.voicing[ch], value: v, wait: settle, id: 'voicing' },
+    { cc: nav.channelSelect.cc, value: nav.channelSelect.values[ch], wait: settle, id: 'channel' },
+    { cc: nav.voicing.cc[ch], value: v, wait: settle, id: 'voicing' },
   ];
 }
 

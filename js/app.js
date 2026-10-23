@@ -117,9 +117,9 @@ function build() {
   const vl = spec.navigation.voicing.labels;
   vl.forEach((label, i) => {
     $('voicing').append(h('button', {
-      type: 'button', class: 'voice', role: 'radio', 'data-v': i, text: label,
+      type: 'button', class: 'voice', role: 'radio', 'data-v': i, title: spec.navigation.voicing.names[i],
       onclick: () => selectSlot(state.active.channel, i),
-    }));
+    }, h('span', { class: 'voice-num', text: label }), h('span', { class: 'voice-name', text: spec.navigation.voicing.names[i] })));
   });
   document.querySelectorAll('.chan').forEach((b) => b.addEventListener('click', () => {
     const ch = b.dataset.ch;
@@ -160,7 +160,7 @@ function renderAll() {
   }
   document.querySelectorAll('.chan').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.ch === ch)));
   document.querySelectorAll('.voice').forEach((b) => b.setAttribute('aria-checked', String(Number(b.dataset.v) === v)));
-  $('ampChan').textContent = `CH ${ch} · ${spec.navigation.voicing.labels[v]}`;
+  $('ampChan').textContent = `CH ${ch} · ${spec.navigation.voicing.labels[v]} ${spec.navigation.voicing.names[v].toUpperCase()}`;
   $('dt50Controls').hidden = !prefs.showDt50;
   renderCab();
   renderReverbState();
@@ -195,14 +195,11 @@ function renderPresetName() {
 
 function labelForCC(cc, value) {
   const nav = spec.navigation;
-  if (nav.legacy) {
-    for (const ch of ['A', 'B']) {
-      if (nav.legacy.voicing[ch] === cc) return `Voicing ${ch} · ${nav.voicing.labels[value] ?? '?'}`;
+  for (const ch of ['A', 'B']) {
+    if (nav.voicing.cc[ch] === cc) {
+      const v = nav.voicing.labels[value];
+      return v ? `Voicing ${ch} · ${v} (${nav.voicing.names[value]})` : `Voicing ${ch} · ?`;
     }
-  }
-  if (cc === nav.voicing.cc) {
-    const ch = value >= nav.voicing.base.B ? 'B' : 'A';
-    return `Select Ch ${ch} · ${nav.voicing.labels[value - nav.voicing.base[ch]] ?? '?'}`;
   }
   if (cc === nav.channelSelect.cc) return `Channel ${value >= 64 ? 'B' : 'A'}`;
   if (cc === nav.channelToggle.cc) return 'Toggle channel';
